@@ -7,6 +7,9 @@ import useAuthStore from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import 'react-phone-number-input/style.css';
 
+// 👉 Change this to '/' if your app’s main route is root
+const MAIN_ROUTE = '/home';
+
 export default function LoginScreen({ onLogin }) {
   const { login } = useAuthStore();
   const navigate = useNavigate();
@@ -20,38 +23,34 @@ export default function LoginScreen({ onLogin }) {
 
   const otpRefs = useRef([]);
   const isPhoneValid = phone && isValidPhoneNumber(phone);
-
-  // --- MOCK HELPERS ---
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  // Send OTP (MOCK)
+  // Mock: always “send” OTP and go to OTP screen
   const sendOTP = async () => {
     if (!isPhoneValid) return;
-    setLoading(true);
-    setError('');
-    await sleep(500);            // simulate API delay
-    setStep('otp');              // go to OTP screen
+    setLoading(true); setError('');
+    await sleep(400);
+    setStep('otp');
     setLoading(false);
   };
 
-  // Verify OTP (MOCK) -> LOGIN -> NAVIGATE
+  // Mock: accept ANY 6 digits, log in, then navigate
   const verifyOTP = async () => {
     if (otp.length !== 6) return;
-    setLoading(true);
-    setError('');
-    await sleep(500);            // simulate API delay
+    setLoading(true); setError('');
+    await sleep(400);
 
     const user = { id: 'demo-user', name: name?.trim() || 'User', phone };
     const token = 'demo-token';
     login(user, token);
     onLogin && onLogin(user, token);
 
-    // 👇 If your main page is root, change '/home' to '/'
-    navigate('/', { replace: true });
-
+    console.log('✅ Demo login success. Navigating to', MAIN_ROUTE);
+    navigate(MAIN_ROUTE, { replace: true }); // go to main screen
     setLoading(false);
   };
 
+  // Keep a combined string value; auto-verify when 6 digits typed
   const handleOTPChange = (value) => {
     const cleaned = value.replace(/\D/g, '').slice(0, 6);
     setOtp(cleaned);
@@ -158,7 +157,7 @@ export default function LoginScreen({ onLogin }) {
               </button>
 
               <p className="text-xs opacity-70 mt-2">
-                (Mock mode: any 6 digits will verify.)
+                (Demo: any 6-digit code will verify.)
               </p>
             </motion.div>
           )}
@@ -211,15 +210,6 @@ export default function LoginScreen({ onLogin }) {
                   {error}
                 </motion.div>
               )}
-
-              <div className="otp-actions">
-                <button onClick={() => setStep('phone')} className="secondary-button">
-                  Change Number
-                </button>
-                <button onClick={sendOTP} disabled={loading} className="text-button">
-                  Resend Code
-                </button>
-              </div>
 
               {loading && (
                 <div className="loading-indicator">
