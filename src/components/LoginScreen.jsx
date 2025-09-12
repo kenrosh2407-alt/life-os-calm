@@ -47,7 +47,7 @@ export default function LoginScreen({ onLogin }) {
     onLogin && onLogin(user, token);
 
     // 👇 If your main page is root, change '/home' to '/'
-    navigate('/home', { replace: true });
+    navigate('/', { replace: true });
 
     setLoading(false);
   };
