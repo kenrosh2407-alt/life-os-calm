@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LifeOS V1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- PWA essentials -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+  <link rel="icon" href="/icons/icon-512x512.png" type="image/png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="LifeOS" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Theme colors for Android / iOS status bar -->
+  <meta name="theme-color" content="#0f2e4d" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#66A6FF" media="(prefers-color-scheme: light)" />
+</head>
+<body>
+  <!-- React mounts here -->
+  <div id="root"></div>
+
+  <!-- Entry point -->
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

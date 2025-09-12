@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFEFBA"/>
+      <stop offset="50%" stop-color="#89F7FE"/>
+      <stop offset="100%" stop-color="#66A6FF"/>
+    </linearGradient>
+    <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#bg)"/>
+
+  <g transform="translate(640,360)">
+    <circle r="140" fill="rgba(255,255,255,0.25)" filter="url(#blur)"/>
+    <circle r="140" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="2"/>
+    <path d="M-38 -78 h 26 v 110 h 70 v 24 h -96 z" fill="#FFFFFF"/>
+    <text x="0" y="190" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+          font-size="64" fill="#FFFFFF" opacity="0.95" letter-spacing="0.5">LifeOS</text>
+  </g>
+</svg>
