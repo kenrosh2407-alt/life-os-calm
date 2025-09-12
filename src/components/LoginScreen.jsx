@@ -1,106 +1,86 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PhoneInput from 'react-phone-number-input';
 import { isValidPhoneNumber } from 'libphonenumber-js';
-import { Phone, ArrowRight, Loader2, Check } from 'lucide-react';
+import { Phone, ArrowRight, Loader2 } from 'lucide-react';
 import useAuthStore from '../stores/authStore';
+import { useNavigate } from 'react-router-dom';
 import 'react-phone-number-input/style.css';
 
 export default function LoginScreen({ onLogin }) {
   const { login } = useAuthStore();
-  const [step, setStep] = useState('phone'); // 'phone' | 'otp' | 'name'
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState('phone'); // 'phone' | 'otp'
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const otpRefs = useRef([]);
   const isPhoneValid = phone && isValidPhoneNumber(phone);
 
+  // --- MOCK HELPERS ---
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // Send OTP (MOCK)
   const sendOTP = async () => {
     if (!isPhoneValid) return;
-    
     setLoading(true);
     setError('');
-    
-    try {
-      const response = await fetch(`${window.location.protocol}//${window.location.hostname}:8000/api/auth/send-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, name: name || 'User' })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setStep('otp');
-      } else {
-        setError(data.error || 'Failed to send OTP');
-      }
-    } catch (err) {
-      setError('Network error. Please try again.');
-    }
-    
+    await sleep(500);            // simulate API delay
+    setStep('otp');              // go to OTP screen
     setLoading(false);
   };
 
+  // Verify OTP (MOCK) -> LOGIN -> NAVIGATE
   const verifyOTP = async () => {
     if (otp.length !== 6) return;
-    
     setLoading(true);
     setError('');
-    
-    try {
-      const response = await fetch(`${window.location.protocol}//${window.location.hostname}:8000/api/auth/verify-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, otp })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        // Update auth store which handles localStorage
-        login(data.user, data.token);
-        onLogin(data.user, data.token);
-      } else {
-        setError(data.error || 'Invalid OTP');
-        setOtp('');
-      }
-    } catch (err) {
-      setError('Network error. Please try again.');
-    }
-    
+    await sleep(500);            // simulate API delay
+
+    const user = { id: 'demo-user', name: name?.trim() || 'User', phone };
+    const token = 'demo-token';
+    login(user, token);
+    onLogin && onLogin(user, token);
+
+    // 👇 If your main page is root, change '/home' to '/'
+    navigate('/home', { replace: true });
+
     setLoading(false);
   };
 
   const handleOTPChange = (value) => {
     const cleaned = value.replace(/\D/g, '').slice(0, 6);
     setOtp(cleaned);
-    if (cleaned.length === 6) {
-      setTimeout(() => verifyOTP(), 100);
-    }
+    if (cleaned.length === 6) setTimeout(() => verifyOTP(), 120);
   };
+
+  useEffect(() => {
+    if (step === 'otp' && otpRefs.current[0]) otpRefs.current[0].focus();
+  }, [step]);
 
   return (
     <div className="login-screen">
-      <motion.div 
+      <motion.div
         className="login-container"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         <div className="login-header">
-          <motion.div 
+          <motion.div
             className="login-icon"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 150 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 150 }}
           >
             <Phone size={32} />
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             className="login-title"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -108,15 +88,14 @@ export default function LoginScreen({ onLogin }) {
           >
             Welcome to LifeOS
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             className="login-subtitle"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
             {step === 'phone' && 'Enter your phone number to get started'}
-            {step === 'name' && 'What should we call you?'}
             {step === 'otp' && `We sent a code to ${phone}`}
           </motion.p>
         </div>
@@ -137,11 +116,11 @@ export default function LoginScreen({ onLogin }) {
                   placeholder="Enter phone number"
                   value={phone}
                   onChange={setPhone}
-                  defaultCountry="US"
+                  defaultCountry="IN"
                   className="phone-input"
                 />
               </div>
-              
+
               <div className="form-group">
                 <label className="form-label">Your Name (Optional)</label>
                 <input
@@ -154,7 +133,7 @@ export default function LoginScreen({ onLogin }) {
               </div>
 
               {error && (
-                <motion.div 
+                <motion.div
                   className="error-message"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -177,6 +156,10 @@ export default function LoginScreen({ onLogin }) {
                   </>
                 )}
               </button>
+
+              <p className="text-xs opacity-70 mt-2">
+                (Mock mode: any 6 digits will verify.)
+              </p>
             </motion.div>
           )}
 
@@ -192,26 +175,26 @@ export default function LoginScreen({ onLogin }) {
               <div className="form-group">
                 <label className="form-label">Verification Code</label>
                 <div className="otp-input-container">
-                  {[...Array(6)].map((_, i) => (
+                  {Array.from({ length: 6 }).map((_, i) => (
                     <input
                       key={i}
                       type="text"
                       className="otp-digit"
                       maxLength="1"
                       value={otp[i] || ''}
+                      ref={(el) => (otpRefs.current[i] = el)}
                       onChange={(e) => {
-                        const newOtp = otp.split('');
-                        newOtp[i] = e.target.value;
-                        handleOTPChange(newOtp.join(''));
+                        const v = e.target.value.replace(/\D/g, '').slice(0, 1);
+                        const arr = otp.split('');
+                        arr[i] = v;
+                        const next = arr.join('');
+                        setOtp(next);
+                        if (v && i < 5) otpRefs.current[i + 1]?.focus();
+                        if (next.length === 6) setTimeout(() => verifyOTP(), 120);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === 'Backspace' && !otp[i] && i > 0) {
-                          document.querySelector(`.otp-digit:nth-child(${i})`).focus();
-                        }
-                      }}
-                      onInput={(e) => {
-                        if (e.target.value && i < 5) {
-                          document.querySelector(`.otp-digit:nth-child(${i + 2})`).focus();
+                          otpRefs.current[i - 1]?.focus();
                         }
                       }}
                     />
@@ -220,7 +203,7 @@ export default function LoginScreen({ onLogin }) {
               </div>
 
               {error && (
-                <motion.div 
+                <motion.div
                   className="error-message"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -230,18 +213,10 @@ export default function LoginScreen({ onLogin }) {
               )}
 
               <div className="otp-actions">
-                <button
-                  onClick={() => setStep('phone')}
-                  className="secondary-button"
-                >
+                <button onClick={() => setStep('phone')} className="secondary-button">
                   Change Number
                 </button>
-                
-                <button
-                  onClick={sendOTP}
-                  disabled={loading}
-                  className="text-button"
-                >
+                <button onClick={sendOTP} disabled={loading} className="text-button">
                   Resend Code
                 </button>
               </div>
