@@ -7,7 +7,9 @@ import useAuthStore from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import 'react-phone-number-input/style.css';
 
-// 👉 Change this to '/' if your app’s main route is root
+/** 👉 Set your main screen here.
+ *  If your home page is '/', change to '/'.
+ */
 const MAIN_ROUTE = '/home';
 
 export default function LoginScreen({ onLogin }) {
@@ -25,7 +27,7 @@ export default function LoginScreen({ onLogin }) {
   const isPhoneValid = phone && isValidPhoneNumber(phone);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  // Mock: always “send” OTP and go to OTP screen
+  // ---- MOCK SEND OTP (always succeeds) ----
   const sendOTP = async () => {
     if (!isPhoneValid) return;
     setLoading(true); setError('');
@@ -34,29 +36,38 @@ export default function LoginScreen({ onLogin }) {
     setLoading(false);
   };
 
-  // Mock: accept ANY 6 digits, log in, then navigate
+  // ---- MOCK VERIFY OTP (accept ANY 6 digits) ----
   const verifyOTP = async () => {
     if (otp.length !== 6) return;
     setLoading(true); setError('');
     await sleep(400);
 
-    const user = { id: 'demo-user', name: name?.trim() || 'User', phone };
+    // pretend success and login
+    const user = { id: 'demo-user', name: (name || 'User').trim(), phone };
     const token = 'demo-token';
     login(user, token);
     onLogin && onLogin(user, token);
 
-    console.log('✅ Demo login success. Navigating to', MAIN_ROUTE);
-    navigate(MAIN_ROUTE, { replace: true }); // go to main screen
+    // Force navigation (SPA + hard fallback to avoid getting "stuck")
+    console.log('✅ Demo OTP accepted. Navigating to', MAIN_ROUTE);
+    navigate(MAIN_ROUTE, { replace: true });
+    setTimeout(() => {
+      if (window.location.pathname !== MAIN_ROUTE) {
+        window.location.assign(MAIN_ROUTE); // hard fallback
+      }
+    }, 150);
+
     setLoading(false);
   };
 
-  // Keep a combined string value; auto-verify when 6 digits typed
+  // Handle combined OTP string & auto-verify at 6 digits
   const handleOTPChange = (value) => {
     const cleaned = value.replace(/\D/g, '').slice(0, 6);
     setOtp(cleaned);
     if (cleaned.length === 6) setTimeout(() => verifyOTP(), 120);
   };
 
+  // focus first OTP box when entering otp step
   useEffect(() => {
     if (step === 'otp' && otpRefs.current[0]) otpRefs.current[0].focus();
   }, [step]);
@@ -199,6 +210,12 @@ export default function LoginScreen({ onLogin }) {
                     />
                   ))}
                 </div>
+              </div>
+
+              {/* back + resend controls */}
+              <div className="otp-actions" style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+                <button onClick={() => setStep('phone')} className="secondary-button">Change Number</button>
+                <button onClick={sendOTP} disabled={loading} className="text-button">Resend Code</button>
               </div>
 
               {error && (
