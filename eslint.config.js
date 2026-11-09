@@ -5,9 +5,9 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '_import', '.venv', '.local']),
   {
-    files: ['**/*.{js,jsx}'],
+    files: ['**/*.{js,jsx,cjs}'],
     extends: [
       js.configs.recommended,
       reactHooks.configs['recommended-latest'],
@@ -23,7 +23,16 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // `motion` is used as <motion.div>, which core ESLint does not count as a use.
+      'no-unused-vars': ['error', { varsIgnorePattern: '^([A-Z_]|motion$)' }],
     },
+  },
+  {
+    files: ['**/*.cjs'],
+    languageOptions: { sourceType: 'commonjs', globals: globals.node },
+  },
+  {
+    files: ['src/test/**/*.{js,jsx}', '**/*.test.{js,jsx}'],
+    languageOptions: { globals: globals.vitest },
   },
 ])

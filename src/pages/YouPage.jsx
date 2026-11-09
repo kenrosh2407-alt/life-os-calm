@@ -9,12 +9,9 @@ export default function YouPage() {
   const {
     weightKg,
     heightCm,
-    steps,
-    waterMl,
     calories,
     rings,
     bmi,
-    ringPct,
     overallRingsPct,
     setWeightKg,
     setHeightCm,
@@ -25,9 +22,6 @@ export default function YouPage() {
 
   const bmiValue = bmi(); // safe number or null
 
-  const movePct = ringPct("move");
-  const exPct = ringPct("exercise");
-  const standPct = ringPct("stand");
   const overallPct = overallRingsPct();
 
   const editNumber = (label, current, onCommit) => {

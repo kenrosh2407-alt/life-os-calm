@@ -36,7 +36,7 @@ export default function AppShell() {
     document.body.scrollTop = 0; document.documentElement.scrollTop = 0;
   }, [location.pathname]);
 
-  const handleLogin = (userData, token) => {
+  const handleLogin = () => {
     setShowSplash(true); // Show welcome splash after login
   };
 
